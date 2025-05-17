@@ -786,7 +786,7 @@ class Library:
 
     def main(self,person):
         print("Welcome to the library service!")
-        time.sleep(2.5)
+        time.sleep(1)
         while True:
             if person == "student":
                 while True:
@@ -918,7 +918,7 @@ def interface():
         elif role == 'professor' and user_id in professors:
             professor_menu(professors[user_id])
         elif role == 'admin' and user_id in admins:
-            admin_menu(admins[user_id])
+            admin_menu(admins[user_id],role)
         else:
             print("Invalid credentials. Try again.") 
 
@@ -1023,7 +1023,7 @@ def professor_menu(professor):
             break
         else:
             print("Invalid option.")
-def admin_menu(admin):
+def admin_menu(admin,role):
     while True:
         print(f"\nWelcome, {admin.name} (Admin)")
         print("1. Manage Students")
@@ -1142,8 +1142,8 @@ def admin_menu(admin):
                 print(f"{k}: {v}")
                 
         elif choice == '8':
-            library1 = Library()
-            library1.main(role)
+            library = Library()
+            library.main(role)
             print("Returning to main menu...")
             time.sleep(2.5)
 
