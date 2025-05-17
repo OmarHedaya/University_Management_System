@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from multipledispatch import dispatch
+import Library_DB
 import time
 
 class Person(ABC):
@@ -796,7 +797,7 @@ class Library:
                         time.sleep(3)
                         break
                 break
-            elif person == "employee":
+            elif person == "admin":
                 while True:
                     student_id = input("Please enter your ID: ")
                     if self.employees_login_id(student_id) == -1:
@@ -1141,8 +1142,8 @@ def admin_menu(admin):
                 print(f"{k}: {v}")
                 
         elif choice == '8':
-            library = Library()
-            library.main("employee")
+            library1 = Library()
+            library1.main(role)
             print("Returning to main menu...")
             time.sleep(2.5)
 
