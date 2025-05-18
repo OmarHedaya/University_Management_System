@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from multipledispatch import dispatch
 import Library_DB
 import time
+import socket
+
 
 class Person(ABC):
     def __init__(self, person_name, person_id, contact_info):
@@ -16,6 +18,7 @@ class Person(ABC):
     def update_contact(self, new_contact):
         self.contact_info = new_contact
         print(f"{self.person_name}'s contact info updated.")
+
 
 class Student(Person):
     def __init__(self, student_id, student_name, major, contact_info):
@@ -71,6 +74,7 @@ class Student(Person):
             'Grades': {course.name: grade for course, grade in self.grades.items()}
         }
 
+
 class Professor(Person):
     def __init__(self, professor_id, name, department, contact_info):
         super().__init__(name, professor_id, contact_info)
@@ -95,6 +99,7 @@ class Professor(Person):
             'Contact': self.contact_info,
             'Courses': [course.name for course in self.courses_taught]
         }
+
 
 class Department:
     def __init__(self, department_id, name, head_of_department):
@@ -121,6 +126,7 @@ class Department:
         for professor in self.faculty_members:
             print(professor.person_name)
 
+
 class Schedule:
     def __init__(self, day, time_, semester, year):
         self.day = day
@@ -136,6 +142,7 @@ class Schedule:
 
     def view_schedule(self):
         print(f"Schedule: {self.day} at {self.time}, Semester: {self.semester}, Year: {self.year}")
+
 
 class Course:
     def __init__(self, course_id, name, department, credit_hours, professor):
@@ -181,7 +188,9 @@ class Course:
     @dispatch(Schedule)
     def assign_schedule(self, schedule):
         self.schedule = schedule
-        print(f"Schedule assigned to {self.name}: {schedule.day} at {schedule.time}, Semester: {schedule.semester}, Year: {schedule.year}")
+        print(
+            f"Schedule assigned to {self.name}: {schedule.day} at {schedule.time}, Semester: {schedule.semester}, Year: {schedule.year}")
+
 
 class Classroom:
     def __init__(self, room_number, capacity, location, availability=True):
@@ -210,6 +219,7 @@ class Classroom:
             'Location': self.location,
             'Availability': self.availability
         }
+
 
 class Exam:
     def __init__(self, exam_code, course, duration):
@@ -241,6 +251,7 @@ class Exam:
             'Duration': self.duration,
             'Results': [(student, grade) for student, grade in self.student_result]
         }
+
 
 class Admin:
     def __init__(self, admin_id, name, contact_info):
@@ -538,7 +549,8 @@ class Admin:
                     course_name = input("Enter course name to assign: ")
                     for course in self.courses:
                         if course.name == course_name:
-                            schedule = Schedule(course.schedule.day, course.schedule.time, course.schedule.semester, course.schedule.year)
+                            schedule = Schedule(course.schedule.day, course.schedule.time, course.schedule.semester,
+                                                course.schedule.year)
                             classroom.assign_classroom(course, schedule)
                             break
                 elif action == "unassign":
@@ -595,14 +607,15 @@ class Admin:
                 return
         print("Exam not found.")
 
+
 class Library:
     def __init__(self):
-        self.__books = [(book[0],book[1]) for book in Library_DB.get_all_books()]
+        self.__books = [(book[0], book[1]) for book in Library_DB.get_all_books()]
         self.__library_id = [student[1] for student in Library_DB.get_all_students_id()]
         self.__employee_id = [employee[1] for employee in Library_DB.get_all_employees_id()]
 
     def update_books(self):
-        self.__books = [(book[0],book[1]) for book in Library_DB.get_all_books()]
+        self.__books = [(book[0], book[1]) for book in Library_DB.get_all_books()]
 
     def update_library_id(self):
         self.__library_id = [student[1] for student in Library_DB.get_all_students_id()]
@@ -626,7 +639,7 @@ class Library:
         else:
             print("Book not registered")
 
-    @dispatch(str,str)
+    @dispatch(str, str)
     def borrow_book(self, student_id, book_name):
         if any(book[0] == book_name for book in self.__books):
             Library_DB.borrow_book(student_id, book_name)
@@ -637,7 +650,7 @@ class Library:
     @dispatch(str, int)
     def borrow_book(self, student_id, book_id):
         if any(book[1] == book_id for book in self.__books):
-            Library_DB.borrow_book(student_id,book_id)
+            Library_DB.borrow_book(student_id, book_id)
             self.update_books()
         else:
             print("book not registered")
@@ -655,14 +668,14 @@ class Library:
         else:
             print(f"{book_name} book is not available")
 
-    def add_library_id(self,student_id):
+    def add_library_id(self, student_id):
         if id not in self.__library_id:
             Library_DB.add_student(student_id)
             self.update_library_id()
         else:
             print("ID already registered")
 
-    def remove_library_id(self,student_id):
+    def remove_library_id(self, student_id):
         try:
             student_id = int(student_id)
             if student_id in self.__library_id:
@@ -710,7 +723,7 @@ class Library:
 
     @staticmethod
     def finalization():
-         while True:
+        while True:
             final = input("Any other services?(Y/N)").lower()
             if final == "y":
                 return -2
@@ -720,7 +733,6 @@ class Library:
             else:
                 print("Please enter a valid input!")
                 continue
-
 
     def services(self, student_id, is_student=True):
         while True:
@@ -743,7 +755,7 @@ class Library:
                             book = book.lower()
                             self.borrow_book(student_id, book)
                     else:
-                        book=input("Please enter the name of the book:")
+                        book = input("Please enter the name of the book:")
                         self.add_book(book)
 
                 elif int(service) == 2:
@@ -784,9 +796,9 @@ class Library:
             elif final == -3:
                 return -1
 
-    def main(self,person):
+    def main(self, person):
         print("Welcome to the library service!")
-        time.sleep(1)
+        time.sleep(2.5)
         while True:
             if person == "student":
                 while True:
@@ -810,23 +822,39 @@ class Library:
                 print("Please enter a valid input!")
                 continue
 
+
+def socket_functions():
+    hostname = 'localhost'
+    ip = socket.gethostbyname(hostname)
+    print(f"IP address of {hostname} is {ip}")
+
+    addr_info = socket.gethostbyaddr(ip)
+    print(f"Host info for {ip} is {addr_info}")
+
+    service = 'http'
+    port = socket.getservbyname(service)
+    print(f"Port of {service} is {port}")
+
+    service_name = socket.getservbyport(80)
+    print(f"Service name for port 80 is {service_name}")
+
+
 def interface():
     dept = Department(1, "Computer Science", "Prof. Mostafa Soliman")
     prof1 = Professor(101, "Dr. Mohamed issa", "Computer Science", "Mohamed@univ.edu")
     prof2 = Professor(102, "Dr. Mostafa ElSayed", "Computer Science", "Mostafa@univ.edu")
-    prof3= Professor(103, "Dr. Ayman Arafa", "Computer Science", "Ayman@univ.edu")
-    prof4= Professor(104, "Dr. Hassan Shokry", "Computer Science", "Hassan@univ.edu")
+    prof3 = Professor(103, "Dr. Ayman Arafa", "Computer Science", "Ayman@univ.edu")
+    prof4 = Professor(104, "Dr. Hassan Shokry", "Computer Science", "Hassan@univ.edu")
     student1 = Student(320240098, "Aly Mohamed Aly", "CS", "Aly@univ.edu")
     student2 = Student(320240096, "Omar Ahmed Hedaya", "CS", "Omar@univ.edu")
     student3 = Student(320240103, "Belal Abdallah AbdElLatif", "CS", "Belal@univ.edu")
     student4 = Student(320240099, "Ahmed Abaza", "CS", "Ahmed@univ.edu")
-    student5= Student(320240083, "Salma Mohamed","Cs","Salma@univ.edu")
-    student6= Student(320240156, "Tarek Mohamed","Cs","Tarek@univ.edu")
+    student5 = Student(320240083, "Salma Mohamed", "Cs", "Salma@univ.edu")
+    student6 = Student(320240156, "Tarek Mohamed", "Cs", "Tarek@univ.edu")
     course1 = Course(301, "Advanced Programming", dept, 3, prof1)
     course2 = Course(302, "Data Structures", dept, 3, prof2)
     course3 = Course(303, "Math 2", dept, 3, prof3)
     course4 = Course(304, "Physics 2", dept, 3, prof4)
-    
 
     dept.courses_offered.extend([course1, course2, course3, course4])
     dept.faculty_members.extend([prof1, prof2, prof3, prof4])
@@ -883,46 +911,51 @@ def interface():
     student6.courses_enrolled.append(course3)
     student6.courses_enrolled.append(course4)
 
-    students = {str(student1.person_id): student1, str(student2.person_id): student2,str(student3.person_id): student3,str(student4.person_id): student4,str(student5.person_id): student5,str(student6.person_id): student6}
-    professors = {str(prof1.person_id): prof1, str(prof2.person_id): prof2,str(prof3.person_id): prof3,str(prof4.person_id): prof4}
-    courses = {str(course1.course_id): course1, str(course2.course_id): course2, str(course3.course_id): course3, str(course4.course_id): course4}
+    students = {str(student1.person_id): student1, str(student2.person_id): student2, str(student3.person_id): student3,
+                str(student4.person_id): student4, str(student5.person_id): student5, str(student6.person_id): student6}
+    professors = {str(prof1.person_id): prof1, str(prof2.person_id): prof2, str(prof3.person_id): prof3,
+                  str(prof4.person_id): prof4}
+    courses = {str(course1.course_id): course1, str(course2.course_id): course2, str(course3.course_id): course3,
+               str(course4.course_id): course4}
 
-    admin1 = Admin(122,"Admin_1","admin_1@univ.edu")
-    admin2 = Admin(123,"Admin_2","admin_2@univ.edu")
-    admin3 = Admin(124,"Admin_3","admin_3@univ.edu")
+    admin1 = Admin(122, "Admin_1", "admin_1@univ.edu")
+    admin2 = Admin(123, "Admin_2", "admin_2@univ.edu")
+    admin3 = Admin(124, "Admin_3", "admin_3@univ.edu")
 
     admin3.students = list(students.values())
     admin3.professors = list(professors.values())
     admin3.courses = list(courses.values())
 
-    admin2.students=list(students.values())
-    admin2.professors=list(professors.values())
-    admin2.courses=list(courses.values())
+    admin2.students = list(students.values())
+    admin2.professors = list(professors.values())
+    admin2.courses = list(courses.values())
 
     admin1.students = list(students.values())
     admin1.professors = list(professors.values())
     admin1.courses = list(courses.values())
-    admins={str(admin1.admin_id):admin1,str(admin2.admin_id):admin2,str(admin3.admin_id):admin3}
+    admins = {str(admin1.admin_id): admin1, str(admin2.admin_id): admin2, str(admin3.admin_id): admin3}
 
     print("\n\n\n\nWelcome to the University System!")
     while True:
         print("\nLogin:")
-        role = input("Are you a student, professor, or admin? (student/professor/admin, or 'exit' to quit): ").strip().lower()
+        role = input(
+            "Are you a student, professor, or admin? (student/professor/admin, or 'exit' to quit): ").strip().lower()
         if role == 'exit':
             print("Goodbye!")
             time.sleep(3)
             break
         user_id = input("Enter your ID: ").strip()
         if role == 'student' and user_id in students:
-            student_menu(students[user_id],dept,role)
+            student_menu(students[user_id], dept, role)
         elif role == 'professor' and user_id in professors:
             professor_menu(professors[user_id])
         elif role == 'admin' and user_id in admins:
             admin_menu(admins[user_id],role)
         else:
-            print("Invalid credentials. Try again.") 
+            print("Invalid credentials. Try again.")
 
-def student_menu(student,dept,role):
+
+def student_menu(student, dept, role):
     while True:
         print(f"\nWelcome, {student.person_name} (Student)")
         print("1. View Info")
@@ -979,6 +1012,7 @@ def student_menu(student,dept,role):
         else:
             print("Invalid option.")
 
+
 def professor_menu(professor):
     while True:
         print(f"\nWelcome, {professor.person_name} (Professor)")
@@ -1003,7 +1037,7 @@ def professor_menu(professor):
                 continue
             print("Enrolled students:")
             for idx, student in enumerate(course.enrolled_students):
-                print(f"{idx+1}. {student.person_name} (ID: {student.person_id})")
+                print(f"{idx + 1}. {student.person_name} (ID: {student.person_id})")
             stu_id = input("Enter student ID to assign grade: ").strip()
             student = next((s for s in course.enrolled_students if str(s.person_id) == stu_id), None)
             if not student:
@@ -1023,6 +1057,8 @@ def professor_menu(professor):
             break
         else:
             print("Invalid option.")
+
+
 def admin_menu(admin,role):
     while True:
         print(f"\nWelcome, {admin.name} (Admin)")
@@ -1034,9 +1070,10 @@ def admin_menu(admin,role):
         print("6. Manage Exams")
         print("7. View Info")
         print("8. Library Services")
-        print("9. Logout")
+        print("9. Network Features")
+        print("10. Logout")
         choice = input("Choose an option: ").strip()
-        
+
         if choice == '1':
             print("\nStudent Management:")
             print("1. Add Student")
@@ -1054,7 +1091,7 @@ def admin_menu(admin,role):
                 admin.print_students()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '2':
             print("\nProfessor Management:")
             print("1. Add Professor")
@@ -1072,7 +1109,7 @@ def admin_menu(admin,role):
                 admin.print_professors()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '3':
             print("\nCourse Management:")
             print("1. Add Course")
@@ -1090,7 +1127,7 @@ def admin_menu(admin,role):
                 admin.print_courses()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '4':
             print("\nSchedule Management:")
             print("1. Add Schedule")
@@ -1108,7 +1145,7 @@ def admin_menu(admin,role):
                 admin.assign_schedule_to_exam()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '5':
             print("\nClassroom Management:")
             print("1. Add Classroom")
@@ -1120,7 +1157,7 @@ def admin_menu(admin,role):
                 admin.manage_classroom()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '6':
             print("\nExam Management:")
             print("1. Add Exam")
@@ -1135,12 +1172,12 @@ def admin_menu(admin,role):
                 admin.remove_exam()
             else:
                 print("Invalid option.")
-                
+
         elif choice == '7':
             info = admin.get_info()
             for k, v in info.items():
                 print(f"{k}: {v}")
-                
+
         elif choice == '8':
             library = Library()
             library.main(role)
@@ -1148,15 +1185,17 @@ def admin_menu(admin,role):
             time.sleep(2.5)
 
         elif choice == '9':
+            print("\nNetwork Features:")
+            socket_functions()
+
+        elif choice == '10':
             print("Logging out...")
             time.sleep(2.5)
             break
-            
+
         else:
             print("Invalid option.")
 
 
-
 if __name__ == "__main__":
     interface()
-                 
